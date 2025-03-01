@@ -17,6 +17,7 @@ setup(
             "flake8",
             "mypy",
             "black",
+            "python-dotenv",
         ],
     },
     entry_points={

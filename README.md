@@ -53,6 +53,27 @@ export HARNESS_ORG_ID="your_org_id_here"  # Optional
 export HARNESS_PROJECT_ID="your_project_id_here"  # Optional
 ```
 
+### Using a .env File (Recommended for Development)
+
+You can also create a `.env` file in the project root with your credentials:
+
+```
+HARNESS_API_KEY="your_api_key_here"
+HARNESS_ACCOUNT_ID="your_account_id_here"
+HARNESS_ORG_ID="your_org_id_here"
+HARNESS_PROJECT_ID="your_project_id_here"
+```
+
+Then install and use python-dotenv to load these values:
+
+```python
+# In your code
+from dotenv import load_dotenv
+load_dotenv()  # This loads the variables from .env
+```
+
+The `.env` file is included in .gitignore to prevent accidentally sharing your credentials.
+
 ### Command Line Arguments
 
 ```
@@ -149,4 +170,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - The Harness platform for providing the APIs that power this tool
 - All contributors to the project
-```
