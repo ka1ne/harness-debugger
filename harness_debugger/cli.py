@@ -4,11 +4,15 @@ import argparse
 import sys
 import os
 from colorama import init, Fore, Style
+from dotenv import load_dotenv
 
 from harness_debugger.client import HarnessClient
 from harness_debugger.utils.constants import *
 from harness_debugger.utils.formatting import print_welcome
 from harness_debugger.commands import delegate, connector, pipeline
+
+# Load .env file if it exists
+load_dotenv()
 
 # Initialize colorama
 init(autoreset=True)

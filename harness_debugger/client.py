@@ -22,8 +22,11 @@ class HarnessClient:
         if not self.api_key or not self.account_id:
             raise ValueError("API key and Account ID are required. Provide them as arguments or set HARNESS_API_KEY and HARNESS_ACCOUNT_ID environment variables.")
         
-        self.base_url = "https://app.harness.io/gateway/pipeline/api"
-        self.delegate_url = "https://app.harness.io/gateway/ng/api/delegate-service/delegates"
+        # Updated API endpoints
+        self.base_url = "https://app.harness.io/gateway/api"
+        self.ng_url = "https://app.harness.io/gateway/ng/api"
+        
+        # Updated headers with the correct format for API key
         self.headers = {
             "x-api-key": self.api_key,
             "Content-Type": "application/json"
@@ -76,34 +79,43 @@ class HarnessClient:
             return {}
 
     def get_all_delegates(self) -> Dict[str, Dict]:
-        """
-        Get information about all delegates in the account
-        
-        Returns:
-            Dict[str, Dict]: Map of delegate ID to delegate information
-        """
+        """Get all delegates in the account."""
         try:
-            params = {
+            print(f"{EMOJI_INFO}{Fore.CYAN} Fetching delegates information...")
+            
+            # Use the delegate-setup endpoint which can list delegates
+            url = f"{self.ng_url}/delegate-setup"
+            
+            # Define the request payload for filtering delegates
+            payload = {
                 "accountIdentifier": self.account_id,
                 "pageIndex": 0,
-                "pageSize": 100
+                "pageSize": 100,
+                # Add filters if needed, or leave empty for all delegates
+                "filterType": "ALL"
             }
             
-            print(f"{EMOJI_INFO}{Fore.CYAN}Fetching delegates information...")
-            response = requests.get(
-                self.delegate_url,
-                headers=self.headers,
-                params=params
-            )
+            # For debugging
+            print(f"DEBUG: Requesting {url}")
+            print(f"DEBUG: Headers: {self.headers}")
+            print(f"DEBUG: Payload: {payload}")
+            
+            # Use POST method as specified in documentation
+            response = requests.post(url, headers=self.headers, json=payload)
             response.raise_for_status()
+            
             data = response.json()
             
             if data.get("status") != "SUCCESS":
-                print(f"{EMOJI_ERROR}{Fore.RED}Error getting delegates: {data.get('message')}")
+                print(f"{EMOJI_ERROR}{Fore.RED} API returned error: {data.get('message', 'Unknown error')}")
+                return {}
+                
+            delegate_list = data.get("data", {}).get("content", [])
+            if not delegate_list:
+                print(f"{EMOJI_WARNING}{Fore.YELLOW} No delegates found")
                 return {}
                 
             delegates = {}
-            delegate_list = data.get("data", {}).get("content", [])
             
             for delegate in tqdm(delegate_list, desc="Processing delegates", unit="delegate"):
                 delegate_id = delegate.get("uuid")
@@ -116,12 +128,13 @@ class HarnessClient:
                         "status": delegate.get("status", "Unknown"),
                         "version": delegate.get("version", "Unknown"),
                         "labels": delegate.get("selectors", []),
-                        "last_heartbeat": datetime.fromtimestamp(int(delegate.get("lastHeartBeat", 0)) / 1000).strftime("%Y-%m-%d %H:%M:%S") if delegate.get("lastHeartBeat") else "Unknown",
+                        "last_heartbeat": datetime.fromtimestamp(int(delegate.get("lastHeartbeat", 0)) / 1000).strftime("%Y-%m-%d %H:%M:%S") if delegate.get("lastHeartbeat") else "Unknown",
                         "connected_at": datetime.fromtimestamp(int(delegate.get("connectedAt", 0)) / 1000).strftime("%Y-%m-%d %H:%M:%S") if delegate.get("connectedAt") else "Unknown",
                         "profile": delegate.get("delegateProfileId", "None")
                     }
             
             return delegates
+            
         except requests.exceptions.RequestException as e:
             print(f"{EMOJI_ERROR}{Fore.RED}Error making API request for delegates: {e}")
             if hasattr(e, 'response') and hasattr(e.response, 'text'):
