@@ -33,7 +33,7 @@ A powerful command-line tool for troubleshooting Harness CI/CD pipelines and del
 
 ```
 # Clone the repository
-git clone https://github.com/yourusername/harness-debugger.git
+git clone https://github.com/ka1ne/harness-debugger.git
 cd harness-debugger
 
 # Install the package
