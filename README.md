@@ -26,8 +26,9 @@ A powerful command-line tool for troubleshooting Harness CI/CD pipelines and del
 
 ## 📋 Requirements
 
-- Python 3.6 or higher
+- Python 3.9 or higher (recommended)
 - pip package manager
+- Valid Harness API key with appropriate permissions
 
 ## 🔧 Installation
 
@@ -79,6 +80,18 @@ The `.env` file is included in .gitignore to prevent accidentally sharing your c
 ```
 harness-debugger --api-key="your_api_key" --account="your_account_id" delegate list
 ```
+
+### API Key Permissions
+
+Your Harness API key needs the following permissions:
+- Read access to Delegates
+- Read access to Pipelines
+- Read access to Connectors
+
+You can create a Personal Access Token (PAT) in the Harness UI:
+1. Go to Account Settings > Access Management > Personal Access Tokens
+2. Create a new token with the appropriate scopes
+3. Copy the token value (it's only shown once!)
 
 ## 🔍 Usage Examples
 
@@ -142,6 +155,28 @@ harness-debugger pipeline check --pipeline=ID --stage=NAME --output=json
 pip install -e ".[dev]"
 ```
 
+### Run the Tool with dotenv Support
+
+Create a `test_run.py` file for easy testing with your `.env` variables:
+
+```python
+#!/usr/bin/env python3
+from dotenv import load_dotenv
+load_dotenv()  # This loads the variables from .env
+
+from harness_debugger.cli import main
+
+if __name__ == "__main__":
+    main()
+```
+
+Make it executable and run it:
+
+```
+chmod +x test_run.py
+./test_run.py delegate list
+```
+
 ### Run Tests
 
 ```
@@ -157,6 +192,23 @@ make lint
 ```
 make clean
 ```
+
+## 🔧 Troubleshooting
+
+### API Connection Issues
+
+If you encounter API errors, try the following:
+- Verify your API key has the proper permissions
+- Check your account ID is correct
+- Enable debug output by setting an environment variable: `export DEBUG=true`
+- Use a fresh API key if you suspect the current one might be expired
+
+### Delegate Issues
+
+If delegates are not appearing in the list:
+- Check if your account has any active delegates
+- Verify that your API credentials have permission to view delegates
+- Check network connectivity to the Harness API endpoints
 
 ## 🤝 Contributing
 
